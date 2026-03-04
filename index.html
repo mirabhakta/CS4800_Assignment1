@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>BudgetPlanner — CS4800 Assignment 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3248;
+  --accent:#6ee7b7;--accent2:#818cf8;--text:#f1f5f9;--muted:#64748b;
+  --font:'DM Sans',sans-serif;--serif:'Playfair Display',serif;
+}
+html,body{min-height:100vh;background:var(--bg);font-family:var(--font);color:var(--text)}
+
+body{
+  background-image:
+    radial-gradient(ellipse at 15% 40%, rgba(110,231,183,.07) 0%, transparent 55%),
+    radial-gradient(ellipse at 85% 15%, rgba(129,140,248,.07) 0%, transparent 55%),
+    radial-gradient(ellipse at 50% 90%, rgba(110,231,183,.04) 0%, transparent 50%);
+}
+
+.page{max-width:780px;margin:0 auto;padding:80px 32px 60px}
+
+/* HEADER */
+.header{text-align:center;margin-bottom:64px}
+.logo{font-size:42px;font-weight:800;color:var(--accent);letter-spacing:-1.5px;margin-bottom:10px}
+.logo span{color:var(--text);font-weight:300}
+.course-badge{
+  display:inline-block;background:rgba(129,140,248,.15);
+  border:1px solid rgba(129,140,248,.3);color:var(--accent2);
+  font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  padding:5px 16px;border-radius:99px;margin-bottom:24px;
+}
+.header h1{
+  font-family:var(--serif);font-size:36px;line-height:1.2;
+  margin-bottom:16px;letter-spacing:-.5px;
+}
+.header p{font-size:16px;color:var(--muted);line-height:1.7;max-width:520px;margin:0 auto 28px}
+
+/* META ROW */
+.meta-row{
+  display:flex;justify-content:center;gap:32px;flex-wrap:wrap;
+  padding:20px;background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:64px;
+}
+.meta-item{text-align:center}
+.meta-label{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px}
+.meta-value{font-size:14px;font-weight:600;color:var(--text)}
+
+/* CARDS */
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:48px}
+
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:32px;text-decoration:none;color:var(--text);
+  transition:all .2s ease;position:relative;overflow:hidden;
+  display:flex;flex-direction:column;
+}
+.card::before{
+  content:"";position:absolute;inset:0;border-radius:16px;
+  background:linear-gradient(135deg,rgba(110,231,183,.05),transparent);
+  opacity:0;transition:opacity .2s;
+}
+.card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.card:hover::before{opacity:1}
+.card:nth-child(2):hover{border-color:var(--accent2)}
+.card:nth-child(2)::before{background:linear-gradient(135deg,rgba(129,140,248,.05),transparent)}
+
+.card-tag{
+  display:inline-block;font-size:11px;font-weight:700;letter-spacing:.6px;
+  text-transform:uppercase;padding:3px 10px;border-radius:99px;margin-bottom:20px;
+  width:fit-content;
+}
+.tag-primary{background:rgba(110,231,183,.15);color:var(--accent)}
+.tag-secondary{background:rgba(129,140,248,.15);color:var(--accent2)}
+
+.card-icon{font-size:40px;margin-bottom:16px}
+.card-title{font-size:20px;font-weight:700;margin-bottom:10px;letter-spacing:-.3px}
+.card-desc{font-size:14px;color:var(--muted);line-height:1.65;flex:1;margin-bottom:24px}
+
+.card-features{display:flex;flex-direction:column;gap:7px;margin-bottom:24px}
+.card-feature{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.card-feature::before{content:"✓";color:var(--accent);font-weight:700;font-size:12px;flex-shrink:0}
+.card:nth-child(2) .card-feature::before{color:var(--accent2)}
+
+.card-cta{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:10px;padding:12px 16px;font-size:14px;font-weight:600;
+  margin-top:auto;transition:all .2s;
+}
+.card:hover .card-cta{background:var(--accent);color:#0f1117;border-color:var(--accent)}
+.card:nth-child(2):hover .card-cta{background:var(--accent2);color:#0f1117;border-color:var(--accent2)}
+.cta-arrow{font-size:16px;transition:transform .2s}
+.card:hover .cta-arrow{transform:translateX(4px)}
+
+/* DELIVERABLES */
+.section-label{
+  font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--muted);margin-bottom:16px;
+}
+.deliverables{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;margin-bottom:40px;
+}
+.deliverable-row{
+  display:flex;align-items:center;gap:16px;padding:14px 20px;
+  border-bottom:1px solid var(--border);font-size:14px;
+}
+.deliverable-row:last-child{border-bottom:none}
+.d-check{
+  width:22px;height:22px;border-radius:6px;background:rgba(16,185,129,.15);
+  display:flex;align-items:center;justify-content:center;
+  color:#34d399;font-size:12px;font-weight:700;flex-shrink:0;
+}
+.d-name{flex:1;font-weight:500}
+.d-type{font-size:12px;color:var(--muted);background:var(--surface2);padding:2px 8px;border-radius:99px}
+
+/* FOOTER */
+.footer{text-align:center;font-size:13px;color:var(--muted);padding-top:32px;border-top:1px solid var(--border)}
+.footer strong{color:var(--accent)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.header{animation:fadeUp .5s ease both}
+.meta-row{animation:fadeUp .5s .1s ease both}
+.cards{animation:fadeUp .5s .2s ease both}
+.deliverables{animation:fadeUp .5s .3s ease both}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="course-badge">CS4800 · Sprint 1 · Assignment 1</div>
+    <div class="logo">💸 Budget<span>Planner</span></div>
+    <h1>Interactive UX Prototype &amp; Storyboard</h1>
+    <p>A clickable proof-of-concept for a personal finance app — built with React, designed for real users, and grounded in a full business plan.</p>
+  </div>
+
+  <!-- META -->
+  <div class="meta-row">
+    <div class="meta-item">
+      <div class="meta-label">Student</div>
+      <div class="meta-value">mirabhakta</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Course</div>
+      <div class="meta-value">CS4800</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Sprint</div>
+      <div class="meta-value">1 — Planning</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Submitted</div>
+      <div class="meta-value">March 2026</div>
+    </div>
+    <div class="meta-item">
+      <div class="meta-label">Tools Used</div>
+      <div class="meta-value">React · Claude AI</div>
+    </div>
+  </div>
+
+  <!-- MAIN CARDS -->
+  <div class="cards">
+    <a href="BudgetPlanner_Prototype.html" class="card">
+      <div class="card-tag tag-primary">Primary Deliverable</div>
+      <div class="card-icon">📱</div>
+      <div class="card-title">Interactive UX Prototype</div>
+      <div class="card-desc">A fully clickable React app prototype with 6 screens, working modals, fake data, and real navigation flows.</div>
+      <div class="card-features">
+        <div class="card-feature">4-step onboarding walkthrough</div>
+        <div class="card-feature">Dashboard with spending charts</div>
+        <div class="card-feature">Add transactions with live form</div>
+        <div class="card-feature">Budget limits with visual warnings</div>
+        <div class="card-feature">Savings goals + contribution modal</div>
+        <div class="card-feature">Debt payoff planner with slider</div>
+      </div>
+      <div class="card-cta">
+        <span>Open Prototype</span>
+        <span class="cta-arrow">→</span>
+      </div>
+    </a>
+
+    <a href="BudgetPlanner_DayInTheLife.html" class="card">
+      <div class="card-tag tag-secondary">UX Narrative</div>
+      <div class="card-icon">📖</div>
+      <div class="card-title">A Day in the Life</div>
+      <div class="card-desc">A scenario-based walkthrough explaining why each screen exists, told through a full day in the life of Alex Rivera — our primary user persona.</div>
+      <div class="card-features">
+        <div class="card-feature">Primary user persona profile</div>
+        <div class="card-feature">6 timestamped moments (7am–10pm)</div>
+        <div class="card-feature">"Why this screen exists" for each page</div>
+        <div class="card-feature">UX design decision rationale</div>
+        <div class="card-feature">Screen-to-scenario summary table</div>
+      </div>
+      <div class="card-cta">
+        <span>Read the Narrative</span>
+        <span class="cta-arrow">→</span>
+      </div>
+    </a>
+  </div>
+
+  <!-- DELIVERABLES CHECKLIST -->
+  <div class="section-label">Submission Checklist</div>
+  <div class="deliverables">
+    <div class="deliverable-row">
+      <div class="d-check">✓</div>
+      <div class="d-name">Interactive clickable prototype</div>
+      <div class="d-type">React · HTML file</div>
+    </div>
+    <div class="deliverable-row">
+      <div class="d-check">✓</div>
+      <div class="d-name">Screen-by-screen navigation (6 screens)</div>
+      <div class="d-type">Prototype</div>
+    </div>
+    <div class="deliverable-row">
+      <div class="d-check">✓</div>
+      <div class="d-name">Buttons, modals, fake data, transitions</div>
+      <div class="d-type">Prototype</div>
+    </div>
+    <div class="deliverable-row">
+      <div class="d-check">✓</div>
+      <div class="d-name">No backend, databases, or real API calls</div>
+      <div class="d-type">Requirement met</div>
+    </div>
+    <div class="deliverable-row">
+      <div class="d-check">✓</div>
+      <div class="d-name">"Day in the Life" UX scenario narrative</div>
+      <div class="d-type">HTML file</div>
+    </div>
+    <div class="deliverable-row">
+      <div class="d-check">✓</div>
+      <div class="d-name">Business plan source document attached</div>
+      <div class="d-type">.docx file</div>
+    </div>
+    <div class="deliverable-row">
+      <div class="d-check">✓</div>
+      <div class="d-name">Viewable link via GitHub Pages</div>
+      <div class="d-type">This page</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    Built with <strong>React + Tailwind</strong> · AI-assisted development using <strong>Claude</strong> · CS4800 Sprint 1
+  </div>
+
+</div>
+</body>
+</html>
