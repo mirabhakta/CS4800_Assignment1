@@ -24,19 +24,6 @@ This repository contains the deliverables of an interactive UX prototype built w
 
 ---
 
-## 📁 Repository Structure
-
-```
-CS4800_Assignment1/
-├── index.html                        # Assignment landing page
-├── BudgetPlanner_Prototype.html      # Interactive React UX prototype
-├── BudgetPlanner_DayInTheLife.html   # UX scenario narrative
-├── BudgetPlanner_Business_Plan.docx  # Source business plan document
-└── README.md                         # This file
-```
-
----
-
 ## 🖥️ Prototype Screens
 
 The interactive prototype covers 6 screens with full click-through navigation:
