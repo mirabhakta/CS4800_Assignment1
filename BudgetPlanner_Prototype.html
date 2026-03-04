@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>BudgetPlanner — Interactive UX Prototype</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.2/babel.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3248;
+  --accent:#6ee7b7;--accent2:#818cf8;--warn:#fbbf24;--danger:#f87171;
+  --text:#f1f5f9;--muted:#64748b;--green:#10b981;
+  --font:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+html,body{height:100%;background:var(--bg);font-family:var(--font);color:var(--text)}
+#root{height:100%}
+
+/* LAYOUT */
+.app-shell{display:flex;height:100vh;overflow:hidden;background:var(--bg)}
+.sidebar{width:220px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column}
+.sidebar-logo{padding:24px 20px 20px;font-size:18px;font-weight:700;letter-spacing:-.5px;color:var(--accent);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.sidebar-nav{flex:1;padding:12px 8px;display:flex;flex-direction:column;gap:2px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;font-size:14px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .15s ease;border:none;background:none;width:100%;text-align:left;font-family:var(--font)}
+.nav-item:hover{background:var(--surface2);color:var(--text)}
+.nav-item.active{background:rgba(110,231,183,.12);color:var(--accent)}
+.nav-icon{font-size:16px;width:20px;text-align:center}
+.sidebar-user{padding:16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#0f1117;flex-shrink:0}
+.user-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-plan{font-size:11px;color:var(--muted)}
+.main{flex:1;overflow-y:auto;padding:28px 32px}
+
+/* PAGE HEADER */
+.page-header{margin-bottom:24px}
+.page-header-row{display:flex;justify-content:space-between;align-items:flex-start}
+.page-title{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.page-sub{font-size:13px;color:var(--muted);margin-top:4px}
+
+/* CARDS */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:20px}
+.card-title{font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+
+/* GRIDS */
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:20px}
+
+/* STAT CARDS */
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+.stat-label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px}
+.stat-value{font-size:24px;font-weight:700;font-family:var(--mono);letter-spacing:-1px}
+.stat-delta{font-size:11px;color:var(--muted);margin-top:4px}
+
+/* PROGRESS */
+.progress-wrap{background:var(--surface2);border-radius:99px;height:8px;overflow:hidden;margin:8px 0 4px}
+.progress-fill{height:100%;border-radius:99px;transition:width .6s ease}
+
+/* TRANSACTIONS */
+.tx-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border)}
+.tx-row:last-child{border-bottom:none}
+.tx-icon{width:36px;height:36px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.tx-info{flex:1}
+.tx-desc{font-size:14px;font-weight:500}
+.tx-cat{font-size:12px;color:var(--muted);margin-top:2px}
+.tx-amount{font-family:var(--mono);font-size:14px;font-weight:600}
+.tx-date{font-size:11px;color:var(--muted)}
+
+/* BUDGET */
+.budget-row{margin-bottom:16px}
+.budget-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.budget-cat{font-size:13px;font-weight:500}
+.budget-amounts{font-size:12px;font-family:var(--mono);color:var(--muted)}
+
+/* GOAL CARDS */
+.goal-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px}
+.goal-emoji{font-size:28px;margin-bottom:10px}
+.goal-name{font-size:15px;font-weight:600;margin-bottom:4px}
+.goal-amounts{font-size:12px;color:var(--muted);font-family:var(--mono)}
+.goal-pct{font-size:20px;font-weight:700;font-family:var(--mono);margin-top:8px}
+
+/* DEBT */
+.debt-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:12px}
+.debt-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.debt-name{font-size:15px;font-weight:600}
+.debt-balance{font-size:20px;font-weight:700;font-family:var(--mono)}
+.debt-meta{display:flex;gap:20px;margin-top:10px}
+.debt-meta-item{font-size:12px;color:var(--muted)}
+.debt-meta-item span{display:block;font-size:14px;font-weight:600;color:var(--text);font-family:var(--mono);margin-top:2px}
+
+/* BADGES */
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:11px;font-weight:600}
+.badge-green{background:rgba(16,185,129,.15);color:#34d399}
+.badge-warn{background:rgba(251,191,36,.15);color:#fbbf24}
+.badge-danger{background:rgba(248,113,113,.15);color:#f87171}
+.badge-purple{background:rgba(129,140,248,.15);color:#a5b4fc}
+
+/* BUTTONS */
+.btn{padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--font);transition:all .15s}
+.btn-primary{background:var(--accent);color:#0f1117}
+.btn-primary:hover{background:#34d399}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--border)}
+.btn-sm{padding:6px 12px;font-size:12px}
+.btn-full{width:100%}
+
+/* MODAL */
+.modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px;width:420px;animation:slideUp .2s ease}
+@keyframes slideUp{from{transform:translateY(16px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-title{font-size:18px;font-weight:700;margin-bottom:20px}
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.4px}
+.form-input{width:100%;padding:10px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:var(--font);font-size:14px}
+.form-input:focus{outline:none;border-color:var(--accent)}
+.modal-actions{display:flex;gap:10px;margin-top:20px;justify-content:flex-end}
+
+/* ONBOARDING */
+.onboard-shell{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);background-image:radial-gradient(ellipse at 20% 50%,rgba(110,231,183,.06) 0%,transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(129,140,248,.06) 0%,transparent 60%)}
+.onboard-card{width:460px;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:40px;text-align:center}
+.onboard-logo{font-size:32px;font-weight:800;color:var(--accent);letter-spacing:-1px;margin-bottom:6px}
+.onboard-tagline{font-size:14px;color:var(--muted);margin-bottom:28px}
+.onboard-steps{display:flex;gap:8px;margin-bottom:32px}
+.onboard-step-dot{flex:1;height:4px;border-radius:2px;transition:background .3s}
+.onboard-illustration{font-size:60px;margin-bottom:20px}
+.onboard-h{font-size:22px;font-weight:700;margin-bottom:10px;letter-spacing:-.5px}
+.onboard-p{font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:28px}
+
+/* PAYOFF METHOD */
+.payoff-method{background:var(--surface2);border:2px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all .15s}
+.payoff-method-name{font-size:14px;font-weight:600;margin-bottom:4px}
+.payoff-method-desc{font-size:12px;color:var(--muted);line-height:1.5}
+
+/* DONUT */
+.donut-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.donut-center{position:absolute;text-align:center;pointer-events:none}
+.legend-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;z-index:200;background:var(--green);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;animation:toastIn .3s ease;display:flex;align-items:center;gap:8px;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+@keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* PROTOTYPE LABEL */
+.proto-label{position:fixed;top:12px;right:12px;background:rgba(129,140,248,.2);border:1px solid var(--accent2);color:var(--accent2);font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;z-index:300;letter-spacing:.5px}
+
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* ── FAKE DATA ─────────────────────────────────────────────── */
+const DEMO_USER = { name: "Alex Rivera", email: "alex@email.com" };
+
+const INIT_TRANSACTIONS = [
+  { id:1,  desc:"Whole Foods Market",    category:"Groceries",     amount:-87.43,  date:"Mar 1" },
+  { id:2,  desc:"Spotify Premium",       category:"Subscriptions", amount:-9.99,   date:"Mar 1" },
+  { id:3,  desc:"Paycheck – Part Time",  category:"Income",        amount:1200.00, date:"Feb 28" },
+  { id:4,  desc:"Shell Gas Station",     category:"Transport",     amount:-55.20,  date:"Feb 28" },
+  { id:5,  desc:"Chipotle",              category:"Dining Out",    amount:-14.75,  date:"Feb 27" },
+  { id:6,  desc:"Netflix",               category:"Subscriptions", amount:-15.49,  date:"Feb 26" },
+  { id:7,  desc:"Target",                category:"Shopping",      amount:-63.12,  date:"Feb 26" },
+  { id:8,  desc:"Starbucks",             category:"Dining Out",    amount:-6.80,   date:"Feb 25" },
+  { id:9,  desc:"Electric Bill",         category:"Utilities",     amount:-94.00,  date:"Feb 25" },
+  { id:10, desc:"Freelance Payment",     category:"Income",        amount:350.00,  date:"Feb 24" },
+];
+
+const INIT_BUDGETS = [
+  { id:1, category:"Groceries",     limit:300, spent:87,  color:"#10b981" },
+  { id:2, category:"Dining Out",    limit:150, spent:121, color:"#f59e0b" },
+  { id:3, category:"Transport",     limit:120, spent:55,  color:"#3b82f6" },
+  { id:4, category:"Subscriptions", limit:50,  spent:25,  color:"#8b5cf6" },
+  { id:5, category:"Shopping",      limit:200, spent:163, color:"#ec4899" },
+  { id:6, category:"Utilities",     limit:150, spent:94,  color:"#06b6d4" },
+];
+
+const INIT_GOALS = [
+  { id:1, name:"Emergency Fund",   target:3000, saved:1240, emoji:"🛡️", color:"#10b981" },
+  { id:2, name:"Spring Break Trip",target:800,  saved:620,  emoji:"✈️", color:"#f59e0b" },
+  { id:3, name:"New Laptop",       target:1500, saved:350,  emoji:"💻", color:"#8b5cf6" },
+];
+
+const DEBTS = [
+  { id:1, name:"Chase Credit Card",     balance:2840,  rate:24.99, minPayment:57,  color:"#ef4444" },
+  { id:2, name:"Student Loan (Federal)",balance:18500, rate:5.05,  minPayment:190, color:"#f59e0b" },
+  { id:3, name:"Car Loan",              balance:6200,  rate:7.9,   minPayment:145, color:"#3b82f6" },
+];
+
+const SPENDING_BY_CAT = [
+  { label:"Groceries",     value:87,  color:"#10b981" },
+  { label:"Dining Out",    value:121, color:"#f59e0b" },
+  { label:"Transport",     value:55,  color:"#3b82f6" },
+  { label:"Subscriptions", value:25,  color:"#8b5cf6" },
+  { label:"Shopping",      value:163, color:"#ec4899" },
+  { label:"Utilities",     value:94,  color:"#06b6d4" },
+];
+
+const CAT_ICONS = {
+  Groceries:"🛒","Dining Out":"🍕",Transport:"🚗",
+  Subscriptions:"📱",Shopping:"🛍️",Utilities:"⚡",Income:"💰",Other:"📦"
+};
+const catIcon = c => CAT_ICONS[c] || "💳";
+
+/* ── DONUT CHART ───────────────────────────────────────────── */
+function DonutChart({ data, size=160 }) {
+  const total = data.reduce((s,d)=>s+d.value,0);
+  const r=56, cx=size/2, cy=size/2, circ=2*Math.PI*r;
+  let cum=0;
+  const slices=data.map(d=>{
+    const pct=d.value/total, dash=pct*circ, gap=circ-dash;
+    const offset=circ-cum*circ; cum+=pct;
+    return {...d,dash,gap,offset};
+  });
+  return (
+    <div>
+      <div className="donut-wrap" style={{width:size,height:size}}>
+        <svg width={size} height={size}>
+          {slices.map((s,i)=>(
+            <circle key={i} cx={cx} cy={cy} r={r} fill="none" stroke={s.color} strokeWidth={22}
+              strokeDasharray={`${s.dash} ${s.gap}`} strokeDashoffset={s.offset}
+              style={{transform:"rotate(-90deg)",transformOrigin:"50% 50%"}}/>
+          ))}
+        </svg>
+        <div className="donut-center">
+          <div style={{fontSize:11,color:"var(--muted)"}}>Spent</div>
+          <div style={{fontSize:18,fontWeight:700,fontFamily:"var(--mono)"}}>${total}</div>
+        </div>
+      </div>
+      <div className="legend-grid">
+        {data.map((d,i)=>(
+          <div key={i} className="legend-item">
+            <div className="legend-dot" style={{background:d.color}}/>
+            <span>{d.label}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/* ── TOAST ─────────────────────────────────────────────────── */
+function Toast({ msg }) {
+  if (!msg) return null;
+  return <div className="toast">✓ {msg}</div>;
+}
+
+/* ── ONBOARDING ─────────────────────────────────────────────── */
+const ONBOARD_STEPS = [
+  { icon:"💸", h:"Take control of your money",
+    p:"BudgetPlanner helps you see where your money goes, set savings goals, and build a plan to get out of debt — no bank link required." },
+  { icon:"📊", h:"Track every dollar",
+    p:"Add income and expenses manually by category. See your spending breakdown in real time with clear visual charts." },
+  { icon:"🎯", h:"Set goals that actually stick",
+    p:"Create savings goals and monthly budget limits. Get visual warnings before you overspend — not after." },
+  { icon:"🧾", h:"Crush your debt",
+    p:"Enter your debts and we'll build a payoff plan using avalanche or snowball method, showing exactly when you'll be debt-free." },
+];
+
+function Onboarding({ onDone }) {
+  const [step,setStep]=useState(0);
+  const s=ONBOARD_STEPS[step];
+  const last=step===ONBOARD_STEPS.length-1;
+  return (
+    <div className="onboard-shell">
+      <div className="onboard-card">
+        <div className="onboard-logo">💸 BudgetPlanner</div>
+        <div className="onboard-tagline">Your money. Under control.</div>
+        <div className="onboard-steps">
+          {ONBOARD_STEPS.map((_,i)=>(
+            <div key={i} className="onboard-step-dot"
+              style={{background:i<=step?"var(--accent)":"var(--border)"}}/>
+          ))}
+        </div>
+        <div className="onboard-illustration">{s.icon}</div>
+        <div className="onboard-h">{s.h}</div>
+        <div className="onboard-p">{s.p}</div>
+        <button className="btn btn-primary btn-full" style={{padding:14,fontSize:15}}
+          onClick={()=>last?onDone():setStep(step+1)}>
+          {last?"Let's go →":"Next"}
+        </button>
+        {step>0&&(
+          <button className="btn btn-ghost btn-sm btn-full" style={{marginTop:10}}
+            onClick={()=>setStep(step-1)}>← Back</button>
+        )}
+        <div style={{marginTop:18,fontSize:12,color:"var(--muted)"}}>
+          Step {step+1} of {ONBOARD_STEPS.length}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── DASHBOARD ──────────────────────────────────────────────── */
+function Dashboard({ txList, onNavigate }) {
+  const income   = txList.filter(t=>t.amount>0).reduce((s,t)=>s+t.amount,0);
+  const expenses = txList.filter(t=>t.amount<0).reduce((s,t)=>s+Math.abs(t.amount),0);
+  const net      = income-expenses;
+  return (
+    <>
+      <div className="page-header">
+        <div className="page-title">Good morning, Alex 👋</div>
+        <div className="page-sub">Your financial snapshot for March 2026</div>
+      </div>
+
+      <div className="grid-4">
+        {[
+          {label:"Monthly Income",  val:`$${income.toLocaleString()}`,     delta:"↑ 8% vs last month",  col:"#10b981"},
+          {label:"Total Spent",     val:`$${expenses.toFixed(2)}`,         delta:"↓ 3% vs last month",  col:"#fbbf24"},
+          {label:"Net Remaining",   val:`$${net.toFixed(2)}`,              delta:"After all expenses",   col:net>0?"#10b981":"#f87171"},
+          {label:"Savings Rate",    val:`${((net/income)*100).toFixed(0)}%`,delta:"Target: 20%",         col:"#818cf8"},
+        ].map((s,i)=>(
+          <div key={i} className="stat-card">
+            <div className="stat-label">{s.label}</div>
+            <div className="stat-value" style={{color:s.col}}>{s.val}</div>
+            <div className="stat-delta">{s.delta}</div>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid-2">
+        <div className="card">
+          <div className="card-title">Spending by Category</div>
+          <DonutChart data={SPENDING_BY_CAT}/>
+        </div>
+        <div className="card">
+          <div className="card-title">Budget Status</div>
+          {INIT_BUDGETS.slice(0,4).map(b=>{
+            const pct=(b.spent/b.limit)*100, over=pct>=90;
+            return (
+              <div key={b.category} className="budget-row">
+                <div className="budget-header">
+                  <span className="budget-cat">{catIcon(b.category)} {b.category}</span>
+                  <span className="budget-amounts">${b.spent} / ${b.limit}</span>
+                </div>
+                <div className="progress-wrap">
+                  <div className="progress-fill" style={{width:`${Math.min(pct,100)}%`,background:over?"var(--danger)":b.color}}/>
+                </div>
+                {over&&<span className="badge badge-warn" style={{fontSize:10}}>Near limit</span>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div className="card">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+          <div className="card-title" style={{marginBottom:0}}>Recent Transactions</div>
+          <button className="btn btn-ghost btn-sm" onClick={()=>onNavigate("transactions")}>View all →</button>
+        </div>
+        {txList.slice(0,5).map(t=>(
+          <div key={t.id} className="tx-row">
+            <div className="tx-icon">{catIcon(t.category)}</div>
+            <div className="tx-info">
+              <div className="tx-desc">{t.desc}</div>
+              <div className="tx-cat">{t.category}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div className="tx-amount" style={{color:t.amount>0?"var(--green)":"var(--text)"}}>
+                {t.amount>0?"+":""}${Math.abs(t.amount).toFixed(2)}
+              </div>
+              <div className="tx-date">{t.date}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+}
+
+/* ── TRANSACTIONS ───────────────────────────────────────────── */
+function Transactions({ txList, setTxList }) {
+  const [showModal,setShowModal]=useState(false);
+  const [toast,setToast]=useState("");
+  const [form,setForm]=useState({desc:"",category:"Groceries",amount:"",type:"expense"});
+
+  const showToast=msg=>{setToast(msg);setTimeout(()=>setToast(""),2500)};
+  const addTx=()=>{
+    if(!form.desc||!form.amount) return;
+    const amt=parseFloat(form.amount)*(form.type==="expense"?-1:1);
+    setTxList([{id:Date.now(),desc:form.desc,category:form.category,amount:amt,date:"Mar 3"},...txList]);
+    setShowModal(false);
+    setForm({desc:"",category:"Groceries",amount:"",type:"expense"});
+    showToast("Transaction added!");
+  };
+
+  return (
+    <>
+      <div className="page-header">
+        <div className="page-header-row">
+          <div>
+            <div className="page-title">Transactions</div>
+            <div className="page-sub">{txList.length} entries this month</div>
+          </div>
+          <button className="btn btn-primary" onClick={()=>setShowModal(true)}>+ Add Transaction</button>
+        </div>
+      </div>
+
+      <div className="card" style={{marginBottom:0}}>
+        {txList.map(t=>(
+          <div key={t.id} className="tx-row">
+            <div className="tx-icon">{catIcon(t.category)}</div>
+            <div className="tx-info">
+              <div className="tx-desc">{t.desc}</div>
+              <div className="tx-cat">{t.category}</div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div className="tx-amount" style={{color:t.amount>0?"var(--green)":"var(--text)"}}>
+                {t.amount>0?"+":""}${Math.abs(t.amount).toFixed(2)}
+              </div>
+              <div className="tx-date">{t.date}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {showModal&&(
+        <div className="modal-backdrop" onClick={e=>e.target===e.currentTarget&&setShowModal(false)}>
+          <div className="modal">
+            <div className="modal-title">Add Transaction</div>
+            <div className="form-group">
+              <label className="form-label">Type</label>
+              <div style={{display:"flex",gap:8}}>
+                {["expense","income"].map(t=>(
+                  <button key={t} className={`btn ${form.type===t?"btn-primary":"btn-ghost"}`}
+                    style={{flex:1}} onClick={()=>setForm({...form,type:t})}>
+                    {t==="expense"?"💸 Expense":"💰 Income"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Description</label>
+              <input className="form-input" placeholder="e.g. Whole Foods" value={form.desc}
+                onChange={e=>setForm({...form,desc:e.target.value})}/>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Category</label>
+              <select className="form-input" value={form.category}
+                onChange={e=>setForm({...form,category:e.target.value})}>
+                {["Groceries","Dining Out","Transport","Subscriptions","Shopping","Utilities","Income","Other"].map(c=>(
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Amount ($)</label>
+              <input className="form-input" type="number" placeholder="0.00" value={form.amount}
+                onChange={e=>setForm({...form,amount:e.target.value})}/>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={()=>setShowModal(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={addTx}>Add Transaction</button>
+            </div>
+          </div>
+        </div>
+      )}
+      <Toast msg={toast}/>
+    </>
+  );
+}
+
+/* ── BUDGETS ────────────────────────────────────────────────── */
+function Budgets() {
+  const [budgets,setBudgets]=useState(INIT_BUDGETS);
+  const [showModal,setShowModal]=useState(false);
+  const [toast,setToast]=useState("");
+  const [form,setForm]=useState({category:"Groceries",limit:""});
+
+  const PALETTE=["#10b981","#f59e0b","#3b82f6","#8b5cf6","#ec4899","#06b6d4","#ef4444","#84cc16"];
+  const showToast=msg=>{setToast(msg);setTimeout(()=>setToast(""),2500)};
+
+  const addBudget=()=>{
+    if(!form.limit) return;
+    setBudgets([...budgets,{id:Date.now(),category:form.category,limit:parseInt(form.limit),spent:0,color:PALETTE[budgets.length%PALETTE.length]}]);
+    setShowModal(false);
+    setForm({category:"Groceries",limit:""});
+    showToast("Budget created!");
+  };
+
+  return (
+    <>
+      <div className="page-header">
+        <div className="page-header-row">
+          <div>
+            <div className="page-title">Monthly Budgets</div>
+            <div className="page-sub">Set and track spending limits per category</div>
+          </div>
+          <button className="btn btn-primary" onClick={()=>setShowModal(true)}>+ New Budget</button>
+        </div>
+      </div>
+
+      <div className="grid-3">
+        {budgets.map(b=>{
+          const pct=(b.spent/b.limit)*100;
+          const remaining=b.limit-b.spent;
+          const status=pct>=100?"over":pct>=80?"warn":"ok";
+          return (
+            <div key={b.id} className="card" style={{borderTop:`3px solid ${b.color}`,marginBottom:0}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+                <div style={{fontWeight:600,fontSize:15}}>{catIcon(b.category)} {b.category}</div>
+                <span className={`badge ${status==="over"?"badge-danger":status==="warn"?"badge-warn":"badge-green"}`}>
+                  {status==="over"?"Over!":status==="warn"?"Near limit":"On track"}
+                </span>
+              </div>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:8}}>
+                <span style={{fontSize:22,fontWeight:700,fontFamily:"var(--mono)"}}>${b.spent}</span>
+                <span style={{fontSize:12,color:"var(--muted)",fontFamily:"var(--mono)"}}>/ ${b.limit}</span>
+              </div>
+              <div className="progress-wrap" style={{height:10}}>
+                <div className="progress-fill" style={{
+                  width:`${Math.min(pct,100)}%`,
+                  background:status==="over"?"var(--danger)":status==="warn"?"var(--warn)":b.color
+                }}/>
+              </div>
+              <div style={{fontSize:12,color:"var(--muted)",marginTop:8}}>
+                {remaining>=0?`$${remaining} remaining`:`$${Math.abs(remaining)} over budget`}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {showModal&&(
+        <div className="modal-backdrop" onClick={e=>e.target===e.currentTarget&&setShowModal(false)}>
+          <div className="modal">
+            <div className="modal-title">Create Budget Limit</div>
+            <div className="form-group">
+              <label className="form-label">Category</label>
+              <select className="form-input" value={form.category}
+                onChange={e=>setForm({...form,category:e.target.value})}>
+                {["Groceries","Dining Out","Transport","Subscriptions","Shopping","Utilities","Entertainment","Health","Other"].map(c=>(
+                  <option key={c}>{c}</option>
+                ))}
+              </select>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Monthly Limit ($)</label>
+              <input className="form-input" type="number" placeholder="e.g. 200" value={form.limit}
+                onChange={e=>setForm({...form,limit:e.target.value})}/>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={()=>setShowModal(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={addBudget}>Create Budget</button>
+            </div>
+          </div>
+        </div>
+      )}
+      <Toast msg={toast}/>
+    </>
+  );
+}
+
+/* ── GOALS ──────────────────────────────────────────────────── */
+function Goals() {
+  const [goals,setGoals]=useState(INIT_GOALS);
+  const [showNew,setShowNew]=useState(false);
+  const [showContrib,setShowContrib]=useState(null);
+  const [toast,setToast]=useState("");
+  const [form,setForm]=useState({name:"",target:"",emoji:"🎯"});
+  const [contribAmt,setContribAmt]=useState("");
+
+  const showToast=msg=>{setToast(msg);setTimeout(()=>setToast(""),2500)};
+  const EMOJIS=["🎯","✈️","🏠","💻","🚗","💍","🎓","🛡️","🏖️","📱"];
+
+  const addGoal=()=>{
+    if(!form.name||!form.target) return;
+    setGoals([...goals,{id:Date.now(),name:form.name,target:parseInt(form.target),saved:0,emoji:form.emoji,color:"#818cf8"}]);
+    setShowNew(false); setForm({name:"",target:"",emoji:"🎯"});
+    showToast("Goal created!");
+  };
+  const contribute=()=>{
+    if(!contribAmt) return;
+    setGoals(goals.map(g=>g.id===showContrib?{...g,saved:Math.min(g.saved+parseFloat(contribAmt),g.target)}:g));
+    setShowContrib(null); setContribAmt("");
+    showToast("Contribution added! 🎉");
+  };
+
+  return (
+    <>
+      <div className="page-header">
+        <div className="page-header-row">
+          <div>
+            <div className="page-title">Savings Goals</div>
+            <div className="page-sub">Track progress toward what matters most</div>
+          </div>
+          <button className="btn btn-primary" onClick={()=>setShowNew(true)}>+ New Goal</button>
+        </div>
+      </div>
+
+      <div className="grid-3">
+        {goals.map(g=>{
+          const pct=(g.saved/g.target)*100, done=pct>=100;
+          return (
+            <div key={g.id} className="goal-card">
+              <div className="goal-emoji">{g.emoji}</div>
+              <div className="goal-name">{g.name}</div>
+              {done&&<div style={{marginBottom:8}}><span className="badge badge-green">✓ Complete!</span></div>}
+              <div className="goal-amounts">${g.saved.toLocaleString()} of ${g.target.toLocaleString()}</div>
+              <div className="goal-pct" style={{color:done?"var(--green)":g.color}}>{pct.toFixed(0)}%</div>
+              <div className="progress-wrap" style={{height:10,margin:"10px 0 14px"}}>
+                <div className="progress-fill" style={{width:`${Math.min(pct,100)}%`,background:done?"var(--green)":g.color}}/>
+              </div>
+              <div style={{fontSize:12,color:"var(--muted)",marginBottom:14}}>
+                {done?"You hit your goal! 🎉":`$${(g.target-g.saved).toLocaleString()} to go`}
+              </div>
+              {!done&&(
+                <button className="btn btn-ghost btn-sm btn-full"
+                  onClick={()=>setShowContrib(g.id)}>+ Add Contribution</button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {showNew&&(
+        <div className="modal-backdrop" onClick={e=>e.target===e.currentTarget&&setShowNew(false)}>
+          <div className="modal">
+            <div className="modal-title">Create Savings Goal</div>
+            <div className="form-group">
+              <label className="form-label">Pick an Emoji</label>
+              <div style={{display:"flex",gap:6,flexWrap:"wrap"}}>
+                {EMOJIS.map(e=>(
+                  <button key={e} onClick={()=>setForm({...form,emoji:e})}
+                    style={{fontSize:22,padding:"6px 10px",borderRadius:8,
+                      border:`2px solid ${form.emoji===e?"var(--accent)":"var(--border)"}`,
+                      background:"var(--surface2)",cursor:"pointer"}}>
+                    {e}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Goal Name</label>
+              <input className="form-input" placeholder="e.g. Emergency Fund" value={form.name}
+                onChange={e=>setForm({...form,name:e.target.value})}/>
+            </div>
+            <div className="form-group">
+              <label className="form-label">Target Amount ($)</label>
+              <input className="form-input" type="number" placeholder="e.g. 1000" value={form.target}
+                onChange={e=>setForm({...form,target:e.target.value})}/>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={()=>setShowNew(false)}>Cancel</button>
+              <button className="btn btn-primary" onClick={addGoal}>Create Goal</button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showContrib!==null&&(
+        <div className="modal-backdrop" onClick={e=>e.target===e.currentTarget&&setShowContrib(null)}>
+          <div className="modal">
+            <div className="modal-title">Add Contribution</div>
+            <div style={{fontSize:13,color:"var(--muted)",marginBottom:16}}>
+              How much would you like to add to this goal today?
+            </div>
+            <div className="form-group">
+              <label className="form-label">Amount ($)</label>
+              <input className="form-input" type="number" placeholder="e.g. 50" value={contribAmt}
+                onChange={e=>setContribAmt(e.target.value)} autoFocus/>
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={()=>setShowContrib(null)}>Cancel</button>
+              <button className="btn btn-primary" onClick={contribute}>Contribute</button>
+            </div>
+          </div>
+        </div>
+      )}
+      <Toast msg={toast}/>
+    </>
+  );
+}
+
+/* ── DEBT PLANNER ───────────────────────────────────────────── */
+function DebtPlanner() {
+  const [method,setMethod]=useState("avalanche");
+  const [extra,setExtra]=useState(100);
+
+  const totalDebt=DEBTS.reduce((s,d)=>s+d.balance,0);
+  const totalMin=DEBTS.reduce((s,d)=>s+d.minPayment,0);
+
+  const sorted=method==="avalanche"
+    ?[...DEBTS].sort((a,b)=>b.rate-a.rate)
+    :[...DEBTS].sort((a,b)=>a.balance-b.balance);
+
+  const estimateMonths=(d,idx)=>{
+    let bal=d.balance, months=0;
+    const rate=d.rate/100/12;
+    const pmt=d.minPayment+(idx===0?extra:0);
+    while(bal>0&&months<600){bal=bal*(1+rate)-pmt;months++;}
+    return months;
+  };
+
+  return (
+    <>
+      <div className="page-header">
+        <div className="page-title">Debt Payoff Planner</div>
+        <div className="page-sub">Pick a strategy — see your debt-free date</div>
+      </div>
+
+      <div className="grid-3">
+        <div className="stat-card">
+          <div className="stat-label">Total Debt</div>
+          <div className="stat-value" style={{color:"var(--danger)"}}>
+            ${totalDebt.toLocaleString()}
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Min Monthly Payments</div>
+          <div className="stat-value" style={{color:"var(--warn)"}}>
+            ${totalMin}/mo
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="stat-label">Your Total Payment</div>
+          <div className="stat-value" style={{color:"var(--green)"}}>
+            ${totalMin+extra}/mo
+          </div>
+          <div className="stat-delta">+${extra} extra on top debt</div>
+        </div>
+      </div>
+
+      <div className="grid-2" style={{marginBottom:16}}>
+        {[
+          {key:"avalanche",icon:"🏔️",name:"Avalanche Method",desc:"Pay highest interest rate first. Saves the most money overall. Mathematically optimal."},
+          {key:"snowball",icon:"⛄",name:"Snowball Method",desc:"Pay smallest balance first. Delivers quick wins to build momentum and motivation."},
+        ].map(m=>(
+          <div key={m.key} className="payoff-method" onClick={()=>setMethod(m.key)}
+            style={{borderColor:method===m.key?"var(--accent)":"var(--border)",
+              background:method===m.key?"rgba(110,231,183,.08)":"var(--surface2)"}}>
+            <div className="payoff-method-name">{m.icon} {m.name}</div>
+            <div className="payoff-method-desc">{m.desc}</div>
+            {method===m.key&&<span className="badge badge-green" style={{marginTop:8}}>✓ Selected</span>}
+          </div>
+        ))}
+      </div>
+
+      <div className="card">
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+          <div>
+            <div className="card-title" style={{marginBottom:2}}>Extra Monthly Payment</div>
+            <div style={{fontSize:12,color:"var(--muted)"}}>Applied to your top-priority debt</div>
+          </div>
+          <div style={{display:"flex",alignItems:"center",gap:12}}>
+            <input type="range" min={0} max={500} step={25} value={extra}
+              onChange={e=>setExtra(parseInt(e.target.value))}
+              style={{width:140,accentColor:"var(--accent)"}}/>
+            <span style={{fontFamily:"var(--mono)",fontWeight:700,color:"var(--accent)",
+              minWidth:50,fontSize:18}}>${extra}</span>
+          </div>
+        </div>
+      </div>
+
+      {sorted.map((d,idx)=>{
+        const months=estimateMonths(d,idx);
+        const yrs=Math.floor(months/12), mos=months%12;
+        const intPaid=Math.max(0,Math.round((d.minPayment+(idx===0?extra:0))*months-d.balance));
+        return (
+          <div key={d.id} className="debt-card">
+            <div className="debt-header">
+              <div>
+                <div style={{fontSize:11,color:"var(--muted)",marginBottom:4,fontWeight:700,letterSpacing:.5}}>
+                  #{idx+1} — PAY THIS {idx===0?"FIRST":"NEXT"}
+                </div>
+                <div className="debt-name">{d.name}</div>
+              </div>
+              <div style={{textAlign:"right"}}>
+                <div className="debt-balance" style={{color:d.color}}>${d.balance.toLocaleString()}</div>
+                <span className="badge badge-danger">{d.rate}% APR</span>
+              </div>
+            </div>
+            <div className="progress-wrap" style={{height:8}}>
+              <div className="progress-fill" style={{
+                width:`${Math.max(5,100-(d.balance/totalDebt)*100)}%`,
+                background:d.color
+              }}/>
+            </div>
+            <div className="debt-meta">
+              <div className="debt-meta-item">Min Payment<span>${d.minPayment}/mo</span></div>
+              <div className="debt-meta-item">Payoff In<span>{yrs>0?`${yrs}y `:""}{mos}mo</span></div>
+              <div className="debt-meta-item">Interest Paid<span style={{color:"var(--danger)"}}>${intPaid.toLocaleString()}</span></div>
+            </div>
+          </div>
+        );
+      })}
+    </>
+  );
+}
+
+/* ── NAV CONFIG ─────────────────────────────────────────────── */
+const NAV=[
+  {id:"dashboard",    label:"Dashboard",     icon:"📊"},
+  {id:"transactions", label:"Transactions",  icon:"💳"},
+  {id:"budgets",      label:"Budgets",       icon:"📋"},
+  {id:"goals",        label:"Savings Goals", icon:"🎯"},
+  {id:"debt",         label:"Debt Planner",  icon:"🧾"},
+];
+
+/* ── ROOT APP ───────────────────────────────────────────────── */
+function App() {
+  const [screen,setScreen]=useState("onboarding");
+  const [page,setPage]=useState("dashboard");
+  const [txList,setTxList]=useState(INIT_TRANSACTIONS);
+
+  if(screen==="onboarding"){
+    return <Onboarding onDone={()=>setScreen("app")}/>;
+  }
+
+  return (
+    <div className="app-shell">
+      <div className="proto-label">UX PROTOTYPE</div>
+      <nav className="sidebar">
+        <div className="sidebar-logo">💸 BudgetPlanner</div>
+        <div className="sidebar-nav">
+          {NAV.map(n=>(
+            <button key={n.id} className={`nav-item ${page===n.id?"active":""}`}
+              onClick={()=>setPage(n.id)}>
+              <span className="nav-icon">{n.icon}</span>{n.label}
+            </button>
+          ))}
+        </div>
+        <div className="sidebar-user">
+          <div className="avatar">AR</div>
+          <div>
+            <div className="user-name">{DEMO_USER.name}</div>
+            <div className="user-plan">Free Plan</div>
+          </div>
+        </div>
+      </nav>
+      <main className="main">
+        {page==="dashboard"    && <Dashboard txList={txList} onNavigate={setPage}/>}
+        {page==="transactions" && <Transactions txList={txList} setTxList={setTxList}/>}
+        {page==="budgets"      && <Budgets/>}
+        {page==="goals"        && <Goals/>}
+        {page==="debt"         && <DebtPlanner/>}
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>

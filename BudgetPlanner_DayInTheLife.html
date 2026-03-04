@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>A Day in the Life — BudgetPlanner UX Narrative</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@500&family=Playfair+Display:ital,wght@0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#faf9f7;--surface:#ffffff;--border:#e8e4de;
+  --accent:#0d7c6b;--accent-light:#e6f4f1;
+  --text:#1a1a1a;--muted:#6b7280;--warn:#d97706;--danger:#dc2626;
+  --font:'DM Sans',sans-serif;--serif:'Playfair Display',serif;--mono:'DM Mono',monospace;
+}
+body{background:var(--bg);font-family:var(--font);color:var(--text);line-height:1.7}
+
+/* HERO */
+.hero{
+  background:linear-gradient(135deg,#0d7c6b 0%,#0a5a4d 60%,#083d35 100%);
+  color:#fff;padding:72px 48px 60px;position:relative;overflow:hidden;
+}
+.hero::before{
+  content:"";position:absolute;inset:0;
+  background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+.hero-tag{
+  display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);
+  color:rgba(255,255,255,.9);font-size:12px;font-weight:600;letter-spacing:1px;
+  text-transform:uppercase;padding:5px 14px;border-radius:99px;margin-bottom:20px;
+}
+.hero h1{font-family:var(--serif);font-size:48px;line-height:1.15;margin-bottom:16px;max-width:680px}
+.hero h1 em{font-style:italic;color:#6ee7b7}
+.hero-sub{font-size:16px;color:rgba(255,255,255,.75);max-width:560px;line-height:1.6;margin-bottom:32px}
+.hero-meta{display:flex;gap:32px;flex-wrap:wrap}
+.hero-meta-item{font-size:13px;color:rgba(255,255,255,.6)}
+.hero-meta-item strong{display:block;font-size:15px;color:#fff;margin-bottom:2px}
+
+/* CONTAINER */
+.container{max-width:860px;margin:0 auto;padding:0 32px}
+
+/* PERSONA */
+.persona-strip{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:16px;padding:28px 32px;margin:40px 0;
+  display:flex;gap:28px;align-items:flex-start;
+  box-shadow:0 2px 12px rgba(0,0,0,.06);
+}
+.persona-avatar{
+  width:72px;height:72px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#6ee7b7,#818cf8);
+  display:flex;align-items:center;justify-content:center;
+  font-size:30px;
+}
+.persona-name{font-size:20px;font-weight:700;margin-bottom:4px}
+.persona-role{font-size:13px;color:var(--accent);font-weight:600;margin-bottom:10px}
+.persona-bio{font-size:14px;color:var(--muted);line-height:1.6}
+.persona-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.tag{background:var(--accent-light);color:var(--accent);font-size:12px;font-weight:600;padding:3px 10px;border-radius:99px}
+
+/* TIMELINE */
+.timeline{padding:8px 0 40px}
+.time-block{display:flex;gap:24px;margin-bottom:0;position:relative}
+.time-block::before{
+  content:"";position:absolute;left:82px;top:52px;bottom:-1px;
+  width:2px;background:var(--border);
+}
+.time-block:last-child::before{display:none}
+.time-stamp{
+  width:82px;flex-shrink:0;padding-top:28px;
+  font-size:13px;font-weight:700;color:var(--accent);
+  font-family:var(--mono);text-align:right;
+}
+.time-dot-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;padding-top:22px}
+.time-dot{
+  width:20px;height:20px;border-radius:50%;background:var(--accent);
+  border:3px solid var(--bg);box-shadow:0 0 0 2px var(--accent);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;z-index:1;
+}
+.time-dot span{font-size:10px}
+.time-content{flex:1;padding:24px 0 40px}
+.time-icon{font-size:28px;margin-bottom:10px}
+.time-screen-label{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--accent-light);color:var(--accent);
+  font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;
+  padding:3px 10px;border-radius:99px;margin-bottom:12px;
+}
+.time-h{font-size:20px;font-weight:700;margin-bottom:8px;letter-spacing:-.3px}
+.time-p{font-size:15px;color:var(--muted);line-height:1.7;margin-bottom:14px}
+.time-ux-box{
+  background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--accent);
+  border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:14px;
+}
+.time-ux-box-title{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px}
+.time-ux-box p{font-size:14px;color:var(--text);line-height:1.6}
+.time-insight{
+  background:#fffbeb;border:1px solid #fde68a;border-radius:10px;
+  padding:12px 16px;font-size:13px;color:#92400e;line-height:1.5;
+  display:flex;gap:10px;align-items:flex-start;
+}
+.time-insight::before{content:"💡";flex-shrink:0;margin-top:1px}
+
+/* SCREEN REFERENCE */
+.screen-ref{
+  background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:16px 20px;margin:12px 0;display:flex;gap:16px;align-items:flex-start;
+}
+.screen-ref-num{
+  width:28px;height:28px;border-radius:8px;background:var(--accent);
+  color:#fff;font-size:13px;font-weight:700;display:flex;align-items:center;
+  justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.screen-ref-name{font-size:14px;font-weight:700;margin-bottom:3px}
+.screen-ref-desc{font-size:13px;color:var(--muted)}
+
+/* SECTION HEADER */
+.section-header{margin:48px 0 24px;text-align:center}
+.section-header h2{font-family:var(--serif);font-size:32px;margin-bottom:8px;letter-spacing:-.5px}
+.section-header p{font-size:14px;color:var(--muted)}
+.divider{height:1px;background:var(--border);margin:0}
+
+/* SCREEN MAP */
+.screen-map{display:grid;grid-template-columns:repeat(5,1fr);gap:0;margin:32px 0;border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.screen-map-item{padding:16px 12px;text-align:center;border-right:1px solid var(--border);background:var(--surface)}
+.screen-map-item:last-child{border-right:none}
+.screen-map-icon{font-size:24px;margin-bottom:8px}
+.screen-map-name{font-size:12px;font-weight:600;color:var(--text);margin-bottom:4px}
+.screen-map-num{font-size:11px;color:var(--muted)}
+
+/* SUMMARY TABLE */
+.summary-table{width:100%;border-collapse:collapse;margin:24px 0;font-size:14px}
+.summary-table th{background:var(--accent);color:#fff;padding:12px 16px;text-align:left;font-weight:600;font-size:13px}
+.summary-table td{padding:12px 16px;border-bottom:1px solid var(--border)}
+.summary-table tr:nth-child(even) td{background:var(--accent-light)}
+.summary-table tr:last-child td{border-bottom:none}
+
+/* FOOTER */
+.footer{background:var(--text);color:rgba(255,255,255,.6);padding:32px 48px;margin-top:60px;font-size:13px;display:flex;justify-content:space-between;align-items:center;flex-wrap:gap}
+.footer-logo{font-size:16px;font-weight:700;color:#6ee7b7;margin-bottom:4px}
+
+@media print{
+  .hero{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .time-block::before{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-tag">Sprint 1 — UX Narrative</div>
+  <h1>A Day in the Life of <em>Alex Rivera</em></h1>
+  <div class="hero-sub">
+    How a 24-year-old college student uses BudgetPlanner across one ordinary Friday —
+    and why every screen in the prototype exists.
+  </div>
+  <div class="hero-meta">
+    <div class="hero-meta-item"><strong>Document Type</strong>UX Scenario Narrative</div>
+    <div class="hero-meta-item"><strong>Project</strong>BudgetPlanner — Class Project</div>
+    <div class="hero-meta-item"><strong>Sprint</strong>1 of 4 — Planning</div>
+    <div class="hero-meta-item"><strong>Date</strong>March 2026</div>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- PERSONA -->
+  <div class="persona-strip">
+    <div class="persona-avatar">👤</div>
+    <div>
+      <div class="persona-name">Alex Rivera</div>
+      <div class="persona-role">Primary User Persona</div>
+      <div class="persona-bio">
+        Alex is a 24-year-old junior studying Computer Information Systems at a state university.
+        They work 20 hours a week at a campus IT help desk earning about $1,550/month, plus occasional
+        freelance work. Alex graduated high school with no financial education, carries $18,500 in
+        student loan debt, and has $2,840 on a Chase credit card from a rough semester. They want to
+        save for a spring break trip and eventually move into their own apartment — but always feel like
+        the money just disappears before the month ends.
+      </div>
+      <div class="persona-tags">
+        <span class="tag">Young Professional</span>
+        <span class="tag">Student Debt</span>
+        <span class="tag">Credit Card Balance</span>
+        <span class="tag">Irregular Income</span>
+        <span class="tag">Savings Goal</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SCREEN MAP -->
+  <div class="section-header">
+    <h2>The Five Screens</h2>
+    <p>Each screen in the prototype maps to a real moment in Alex's day</p>
+  </div>
+  <div class="screen-map">
+    <div class="screen-map-item">
+      <div class="screen-map-icon">👋</div>
+      <div class="screen-map-name">Onboarding</div>
+      <div class="screen-map-num">Screen 1</div>
+    </div>
+    <div class="screen-map-item">
+      <div class="screen-map-icon">📊</div>
+      <div class="screen-map-name">Dashboard</div>
+      <div class="screen-map-num">Screen 2</div>
+    </div>
+    <div class="screen-map-item">
+      <div class="screen-map-icon">💳</div>
+      <div class="screen-map-name">Transactions</div>
+      <div class="screen-map-num">Screen 3</div>
+    </div>
+    <div class="screen-map-item">
+      <div class="screen-map-icon">📋</div>
+      <div class="screen-map-name">Budgets</div>
+      <div class="screen-map-num">Screen 4</div>
+    </div>
+    <div class="screen-map-item">
+      <div class="screen-map-icon">🎯</div>
+      <div class="screen-map-name">Goals &amp; Debt</div>
+      <div class="screen-map-num">Screens 5–6</div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- TIMELINE -->
+  <div class="section-header" style="margin-top:48px">
+    <h2>Friday, March 6, 2026</h2>
+    <p>From morning coffee to bedtime — Alex's financial moments throughout the day</p>
+  </div>
+
+  <div class="timeline">
+
+    <!-- 7:45 AM -->
+    <div class="time-block">
+      <div class="time-stamp">7:45 AM</div>
+      <div class="time-dot-wrap">
+        <div class="time-dot"><span>1</span></div>
+      </div>
+      <div class="time-content">
+        <div class="time-icon">☕</div>
+        <div class="time-screen-label">📱 Screen 1 — Onboarding</div>
+        <div class="time-h">Alex hears about BudgetPlanner from a friend</div>
+        <div class="time-p">
+          Alex's roommate mentions they've been using BudgetPlanner to finally stop overdrafting.
+          Alex downloads it over morning coffee, skeptical but curious. They've tried Mint before — it
+          was confusing, full of ads, and eventually just stopped working. They don't want to link their
+          bank account to yet another app they'll abandon in a week.
+        </div>
+        <div class="time-ux-box">
+          <div class="time-ux-box-title">Why Onboarding Exists</div>
+          <p>
+            The 4-step onboarding screen needs to answer Alex's three unspoken questions immediately:
+            <em>What does this do? Do I have to connect my bank? Is this going to be complicated?</em>
+            Each step addresses one of those fears, building trust before asking Alex to create an account.
+            The progress dots show it's short. The copy emphasizes "no bank link required."
+          </p>
+        </div>
+        <div class="time-insight">
+          UX decision: Onboarding comes before signup. Forcing account creation first is the #1
+          reason users abandon apps. Show value first, ask for commitment second.
+        </div>
+      </div>
+    </div>
+
+    <!-- 9:15 AM -->
+    <div class="time-block">
+      <div class="time-stamp">9:15 AM</div>
+      <div class="time-dot-wrap">
+        <div class="time-dot"><span>2</span></div>
+      </div>
+      <div class="time-content">
+        <div class="time-icon">📊</div>
+        <div class="time-screen-label">📊 Screen 2 — Dashboard</div>
+        <div class="time-h">First paycheck of the month lands. Alex checks the dashboard.</div>
+        <div class="time-p">
+          Alex gets a direct deposit notification — $1,200 from the IT help desk. They open
+          BudgetPlanner and see the dashboard for the first time with real data in it.
+          The net remaining number hits differently when you can actually see it: $813 left
+          after known expenses. That's more than Alex expected. But the spending chart shows
+          $163 already spent on shopping — and it's only March 6th.
+        </div>
+        <div class="time-ux-box">
+          <div class="time-ux-box-title">Why the Dashboard Exists</div>
+          <p>
+            The dashboard is the "front door" — it answers the one question every user has every time
+            they open the app: <em>Am I okay right now?</em> The four stat cards (income, spent, remaining,
+            savings rate) are ordered intentionally: good news first (income), then reality check (spent),
+            then the number that matters most (remaining), then the habit goal (savings rate).
+            The donut chart makes categories scannable in under 3 seconds.
+          </p>
+        </div>
+        <div class="time-insight">
+          UX decision: The dashboard shows a savings rate %, not just a dollar amount.
+          Percentages are motivating and comparable across income levels —
+          they create a habit goal ("I want to hit 20%") instead of just a number.
+        </div>
+      </div>
+    </div>
+
+    <!-- 12:30 PM -->
+    <div class="time-block">
+      <div class="time-stamp">12:30 PM</div>
+      <div class="time-dot-wrap">
+        <div class="time-dot"><span>3</span></div>
+      </div>
+      <div class="time-content">
+        <div class="time-icon">🍕</div>
+        <div class="time-screen-label">💳 Screen 3 — Transactions</div>
+        <div class="time-h">Lunch at Chipotle. Alex logs it immediately.</div>
+        <div class="time-p">
+          Alex grabs a burrito bowl for $14.75. They open the app and tap "Add Transaction" before
+          even finishing the meal. This is the habit they're trying to build: log it now, not at the
+          end of the month when they can't remember where $400 went. They categorize it as "Dining Out,"
+          enter the amount, and see a green toast confirmation pop up.
+        </div>
+        <div class="time-ux-box">
+          <div class="time-ux-box-title">Why Transactions Exist</div>
+          <p>
+            This is the core input mechanism — the app is only as useful as the data you put into it.
+            The add-transaction flow is deliberately minimal: type, category, amount. Three fields, one tap.
+            The category dropdown doubles as a budget tracker input — every transaction logged here
+            automatically feeds the budget bars on the next screen. The full transaction list gives
+            Alex a searchable, scrollable record of every dollar.
+          </p>
+        </div>
+        <div class="time-insight">
+          UX decision: The "Add Transaction" button is always visible in the top-right of every
+          screen — not buried in a menu. Speed of logging is critical. If it takes more than
+          10 seconds, users stop doing it.
+        </div>
+      </div>
+    </div>
+
+    <!-- 2:00 PM -->
+    <div class="time-block">
+      <div class="time-stamp">2:00 PM</div>
+      <div class="time-dot-wrap">
+        <div class="time-dot"><span>4</span></div>
+      </div>
+      <div class="time-content">
+        <div class="time-icon">📋</div>
+        <div class="time-screen-label">📋 Screen 4 — Budgets</div>
+        <div class="time-h">Alex checks budgets after lunch — and gets a wake-up call.</div>
+        <div class="time-p">
+          After logging the Chipotle transaction, Alex taps over to the Budgets screen.
+          The "Dining Out" card shows $121 spent of a $150 limit — and it's still the first week
+          of the month. The status badge reads "Near limit" in yellow. Alex stares at it for a moment.
+          There are still three more Fridays this month. They set the limit down to $100 next month
+          and make a mental note: cook more.
+        </div>
+        <div class="time-ux-box">
+          <div class="time-ux-box-title">Why Budgets Exist</div>
+          <p>
+            A transaction list tells you what happened. A budget tells you what's about to happen.
+            The budget screen shifts Alex from reactive to proactive — seeing "near limit" on March 6th
+            changes behavior for the rest of the month. Color-coded status (green / yellow / red)
+            makes the signal immediate without requiring any math. The progress bar is the most
+            important element on this page: it externalizes a number that would otherwise live
+            only in Alex's head.
+          </p>
+        </div>
+        <div class="time-insight">
+          UX decision: Warnings appear at 80% of the limit, not 100%. By the time you're at 100%,
+          it's too late to change behavior. The goal is to interrupt the pattern before it becomes
+          a problem.
+        </div>
+      </div>
+    </div>
+
+    <!-- 6:30 PM -->
+    <div class="time-block">
+      <div class="time-stamp">6:30 PM</div>
+      <div class="time-dot-wrap">
+        <div class="time-dot"><span>5</span></div>
+      </div>
+      <div class="time-content">
+        <div class="time-icon">✈️</div>
+        <div class="time-screen-label">🎯 Screen 5 — Savings Goals</div>
+        <div class="time-h">Payday treat: Alex moves $40 toward the spring break trip.</div>
+        <div class="time-p">
+          It's Friday night. Alex got paid, stuck to a budget today, and feels good about it.
+          They open the Goals screen, find the "Spring Break Trip" card sitting at 77%, and tap
+          "Add Contribution." They type $40 — not a lot, but the progress bar nudges from 77% to 82%.
+          Something about watching that bar move is deeply satisfying. Alex screenshots it and sends it
+          to their travel group chat.
+        </div>
+        <div class="time-ux-box">
+          <div class="time-ux-box-title">Why Goals Exist</div>
+          <p>
+            Budgets prevent bad spending. Goals create a reason to save. Without a concrete target,
+            "saving money" is abstract and easy to skip. The goals screen makes saving tangible:
+            a named thing, an emoji that makes it feel real, a percentage that moves when you contribute.
+            The visual progress bar is the most motivating element in the entire app — it turns a
+            financial behavior into something that feels like a game.
+          </p>
+        </div>
+        <div class="time-insight">
+          UX decision: Goals use emojis, not icons. This sounds trivial, but it's not.
+          An emoji makes a goal feel personal and specific. "🏖️ Spring Break Trip" creates
+          a stronger emotional anchor than a generic vacation icon.
+        </div>
+      </div>
+    </div>
+
+    <!-- 10:15 PM -->
+    <div class="time-block">
+      <div class="time-stamp">10:15 PM</div>
+      <div class="time-dot-wrap">
+        <div class="time-dot"><span>6</span></div>
+      </div>
+      <div class="time-content">
+        <div class="time-icon">🧾</div>
+        <div class="time-screen-label">🧾 Screen 6 — Debt Planner</div>
+        <div class="time-h">Late night, can't sleep. Alex opens the debt planner.</div>
+        <div class="time-p">
+          It's 10pm and Alex is doing what most 24-year-olds do late on a Friday — lying in bed,
+          anxious about money. The credit card balance has been sitting at $2,840 for six months.
+          They open the Debt Planner, switch from Snowball to Avalanche method, and drag the extra
+          payment slider from $0 to $100/month. The payoff estimate drops from 4 years to 2 years 1 month.
+          Alex didn't know $100 extra could make that much difference. They set a reminder to add $100
+          to the Chase card next payday.
+        </div>
+        <div class="time-ux-box">
+          <div class="time-ux-box-title">Why the Debt Planner Exists</div>
+          <p>
+            Debt is the most emotionally charged part of personal finance. The debt planner doesn't just
+            show the problem — it shows the path out. The slider is the key UX element: it makes the
+            relationship between extra payments and time visceral and immediate. Every $25 you drag
+            on that slider shaves months off your payoff date. The avalanche vs. snowball choice
+            respects that different users respond to different motivations (math vs. momentum).
+          </p>
+        </div>
+        <div class="time-insight">
+          UX decision: Show the interest paid, not just the payoff date. "$4,200 in interest
+          saved" is more motivating than "2 years 1 month." Loss aversion is a stronger motivator
+          than abstract timelines.
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end timeline -->
+
+  <div class="divider"></div>
+
+  <!-- SUMMARY TABLE -->
+  <div class="section-header">
+    <h2>Screen-to-Scenario Summary</h2>
+    <p>Every screen justified by a real user need</p>
+  </div>
+
+  <table class="summary-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Screen</th>
+        <th>Alex's Need</th>
+        <th>Key UX Element</th>
+        <th>Time of Day</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>Onboarding</td>
+        <td>"Is this worth my time? Do I have to connect my bank?"</td>
+        <td>4-step walkthrough, no login required</td>
+        <td>7:45 AM</td>
+      </tr>
+      <tr>
+        <td>2</td>
+        <td>Dashboard</td>
+        <td>"Am I okay financially right now?"</td>
+        <td>Net remaining stat, donut chart, quick summary</td>
+        <td>9:15 AM</td>
+      </tr>
+      <tr>
+        <td>3</td>
+        <td>Transactions</td>
+        <td>"I just spent money — let me log it before I forget."</td>
+        <td>3-field add form, instant toast confirmation</td>
+        <td>12:30 PM</td>
+      </tr>
+      <tr>
+        <td>4</td>
+        <td>Budgets</td>
+        <td>"Am I on track this month, or about to blow my budget?"</td>
+        <td>Color-coded progress bars, near-limit warnings</td>
+        <td>2:00 PM</td>
+      </tr>
+      <tr>
+        <td>5</td>
+        <td>Savings Goals</td>
+        <td>"I want to save for something real — let me see progress."</td>
+        <td>Emoji goals, contribution modal, animated progress bar</td>
+        <td>6:30 PM</td>
+      </tr>
+      <tr>
+        <td>6</td>
+        <td>Debt Planner</td>
+        <td>"When will I be out of debt if I pay a little extra?"</td>
+        <td>Extra payment slider, avalanche/snowball toggle</td>
+        <td>10:15 PM</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- CLOSING -->
+  <div style="background:var(--accent-light);border:1px solid #a7d7d0;border-radius:16px;padding:32px;margin:40px 0;text-align:center">
+    <div style="font-size:32px;margin-bottom:12px">💸</div>
+    <div style="font-family:var(--serif);font-size:24px;font-weight:700;margin-bottom:12px;color:var(--accent)">
+      The Goal of BudgetPlanner
+    </div>
+    <div style="font-size:15px;color:#374151;max-width:560px;margin:0 auto;line-height:1.7">
+      Alex doesn't need a financial advisor. They need a simple, honest tool that shows them
+      where their money goes, warns them before they overspend, and gives them a clear path
+      to their goals. BudgetPlanner is that tool — designed around real moments in a real day,
+      not around features on a product roadmap.
+    </div>
+  </div>
+
+</div><!-- end container -->
+
+<div class="footer">
+  <div>
+    <div class="footer-logo">💸 BudgetPlanner</div>
+    <div>Sprint 1 Deliverable — UX Scenario Narrative</div>
+  </div>
+  <div style="text-align:right">
+    <div>Class Project | 3 CS Students</div>
+    <div>March 2026</div>
+  </div>
+</div>
+
+</body>
+</html>
